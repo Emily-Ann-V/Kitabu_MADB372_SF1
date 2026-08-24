@@ -1,7 +1,6 @@
 package com.example.kitabu_madb372_sf1
 
 import android.os.Bundle
-import android.widget.RadioButton
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -62,7 +61,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun BookCatalogScreen(modifier: Modifier = Modifier) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // Calling composable functions
         Header()
         Search()
         BookCatalogGrid(modifier.weight(1f)) // Filling remaining middle space
@@ -70,9 +70,9 @@ fun BookCatalogScreen(modifier: Modifier = Modifier) {
     }
 }
 
+// Creating header section and setting text
 @Composable
 fun Header() {
-//Header
     Text(
         text = "Our Catalog",
         modifier = Modifier
@@ -82,6 +82,7 @@ fun Header() {
     )
 }
 
+// Creating search bar and filter button
 @Composable
 fun Search() {
     var showFilterDialog by remember { mutableStateOf(false) }
@@ -98,10 +99,10 @@ fun Search() {
             placeholder = {
                 Text("Search books")
             },
-            // leadingIcon - Puts icon on the right
-            trailingIcon = { // Putting icon on the left
+            // leadingIcon - Puts icon on the left
+            trailingIcon = { // Putting icon on the right
                 Icon(
-                    imageVector = Icons.Default.Search,// Need to add dependency
+                    imageVector = Icons.Default.Search,// Needed to add Icons dependency
                     contentDescription = "Search"
                 )
             }
@@ -109,7 +110,7 @@ fun Search() {
 
         Button(
             onClick = {
-                showFilterDialog = true
+                showFilterDialog = true // Showing filter dialog when button is pressed
             }
         ) {
             Text("Filter")
@@ -118,26 +119,25 @@ fun Search() {
     FilterDialog(
         showFilterDialog = showFilterDialog,
         onDismiss = {
-            showFilterDialog = false
+            showFilterDialog = false // Hiding filter dialog
         }
     )
 }
 
+// Creating book grid
 @Composable
 fun BookCatalogGrid(modifier: Modifier = Modifier) {
-
-    //Books
     LazyVerticalGrid(
         // Scrolls vertically
         columns = GridCells.Adaptive(minSize = 130.dp), // Adaptive cell width based on screen size
         modifier = modifier
             .padding(20.dp, 50.dp), // Adding padding to the whole grid
-        horizontalArrangement = Arrangement.spacedBy(20.dp), // Adding horizontal padding to in-between items
-        verticalArrangement = Arrangement.spacedBy(20.dp) // Adding vertical padding to in-between items
+        horizontalArrangement = Arrangement.spacedBy(20.dp), // Adding horizontal spacing to in-between items
+        verticalArrangement = Arrangement.spacedBy(20.dp) // Adding vertical spacing to in-between items
         // columns = GridCells.Fixed(2) - Always have 2 columns
     ) {
         item {
-            BookCatalogItem()
+            BookCatalogItem() // Showing book
         }
 
         // ToDo: Delete
@@ -147,14 +147,14 @@ fun BookCatalogGrid(modifier: Modifier = Modifier) {
     }
 }
 
+// Creating book
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookCatalogItem() {
+    var showReservationModal by remember { mutableStateOf(false) } // Setting up state
 
-    var showReservationSheet by remember { mutableStateOf(false) }
-
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false
+    val modalState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false // Allowing modal to open partially
     )
 
     Column(
@@ -170,10 +170,10 @@ fun BookCatalogItem() {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    showReservationSheet = true
+                    showReservationModal = true // Showing reservation modal when card is pressed
                 }
         ) {
-            Column(
+            Column( // Setting book details
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -189,17 +189,17 @@ fun BookCatalogItem() {
         }
     }
     ReservationModal(
-        showReservationSheet = showReservationSheet,
-        sheetState = sheetState,
+        showReservationSheet = showReservationModal,
+        sheetState = modalState,
         onDismiss = {
-            showReservationSheet = false
+            showReservationModal = false // Hiding reservation modal
         }
     )
 }
 
+// Creating footer section and setting text
 @Composable
 fun Footer() {
-    // Footer
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -217,6 +217,7 @@ fun Footer() {
     }
 }
 
+// Creating filter dialog
 @Composable
 fun FilterDialog(
     showFilterDialog: Boolean,
@@ -230,7 +231,7 @@ fun FilterDialog(
             },
             text = {
                 Column {
-                    RadioButtonItem("Author")
+                    RadioButtonItem(option = "Author")
                 }
             },
             confirmButton = {
@@ -252,6 +253,7 @@ fun FilterDialog(
 
 }
 
+// Creating reservation modal
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationModal(
@@ -275,9 +277,10 @@ fun ReservationModal(
                 Text(
                     "Rental Duration",
                 )
-                Column() {
-                    RadioButtonItem("Day 1")
+                Column {
+                    RadioButtonItem("1 Day")
                 }
+
                 Button(onClick = {}) {
                     Text(
                         text = "Reserve"
@@ -289,16 +292,17 @@ fun ReservationModal(
     }
 }
 
+// Creating radio buttons
 @Composable
 fun RadioButtonItem(option: String) {
-    var selectedOption by remember { mutableStateOf("") }
+    var selectedOption by remember { mutableStateOf(false) } // Storing the selected radio button option
 
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
-            selected = selectedOption == option,
-            onClick = { selectedOption = option }
+            selected = selectedOption,
+            onClick = { selectedOption = true }
         )
         Text(option)
     }
