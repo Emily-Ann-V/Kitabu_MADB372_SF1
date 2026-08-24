@@ -1,6 +1,7 @@
 package com.example.kitabu_madb372_sf1
 
 import android.os.Bundle
+import android.widget.RadioButton
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -82,7 +84,8 @@ fun Header() {
 
 @Composable
 fun Search() {
-// Search
+    var showFilterDialog by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -105,11 +108,19 @@ fun Search() {
         )
 
         Button(
-            onClick = { }
+            onClick = {
+                showFilterDialog = true
+            }
         ) {
             Text("Filter")
         }
     }
+    FilterDialog(
+        showFilterDialog = showFilterDialog,
+        onDismiss = {
+            showFilterDialog = false
+        }
+    )
 }
 
 @Composable
@@ -176,15 +187,14 @@ fun BookCatalogItem() {
                 Text("Category")
             }
         }
-
-        ReservationModal(
-            showReservationSheet = showReservationSheet,
-            sheetState = sheetState,
-            onDismiss = {
-                showReservationSheet = false
-            }
-        )
     }
+    ReservationModal(
+        showReservationSheet = showReservationSheet,
+        sheetState = sheetState,
+        onDismiss = {
+            showReservationSheet = false
+        }
+    )
 }
 
 @Composable
@@ -205,6 +215,41 @@ fun Footer() {
             contentDescription = "Next Page"
         )
     }
+}
+
+@Composable
+fun FilterDialog(
+    showFilterDialog: Boolean,
+    onDismiss: () -> Unit
+) {
+    if (showFilterDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text("Filter Catalog")
+            },
+            text = {
+                Column {
+                    RadioButtonItem("Author")
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = onDismiss
+                ) {
+                    Text("Filter")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = onDismiss
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -230,7 +275,9 @@ fun ReservationModal(
                 Text(
                     "Rental Duration",
                 )
-                RentalDurationChoices()
+                Column() {
+                    RadioButtonItem("Day 1")
+                }
                 Button(onClick = {}) {
                     Text(
                         text = "Reserve"
@@ -243,16 +290,7 @@ fun ReservationModal(
 }
 
 @Composable
-fun RentalDurationChoices() {
-    var selectedOption by remember { mutableStateOf("") }
-
-    Column() {
-        RentalDurationItem("Day 1")
-    }
-}
-
-@Composable
-fun RentalDurationItem(option: String) {
+fun RadioButtonItem(option: String) {
     var selectedOption by remember { mutableStateOf("") }
 
     Row(
