@@ -1,6 +1,5 @@
 package com.example.kitabu_madb372_sf1.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -12,32 +11,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Navy,       // Main colour of the app (buttons)
+    secondary = White,     // Secondary colour
+    // tertiary = White,          // Additional colour
+
+    background = White,        // Main background colour of the screens
+    surface = White,           // Default colour for surfaces such as cards and containers
+
+    onPrimary = White,         // Colour displayed on the buttons
+    onSecondary = Navy,       // Colour displayed on CoolBrown components
+    // onTertiary = CoolBrown,    // Colour displayed on White components
+
+    onBackground = Navy,  // Colour displayed on the background
+    onSurface = Navy      // Colour displayed on White surfaces
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Navy,       // Main colour of the app (buttons)
+    secondary = White,     // Secondary colour
+    // tertiary = White,          // Additional colour
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = White,        // Main background colour of the screens
+    surface = White,           // Default colour for surfaces such as cards and containers
+
+    onPrimary = White,         // Colour displayed on the buttons
+    onSecondary = Navy,       // Colour displayed on CoolBrown components
+    // onTertiary = CoolBrown,    // Colour displayed on White components
+
+    onBackground = Navy,  // Colour displayed on the background
+    onSurface = Navy      // Colour displayed on White surfaces
 )
 
 @Composable
 fun Kitabu_MADB372_SF1Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Showing my actual colours
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

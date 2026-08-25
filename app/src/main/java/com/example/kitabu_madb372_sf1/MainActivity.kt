@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,19 +13,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
@@ -38,21 +44,42 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.kitabu_madb372_sf1.ui.theme.Kitabu_MADB372_SF1Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             Kitabu_MADB372_SF1Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    BookCatalogScreen(
+
+                val navController = rememberNavController()
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = MaterialTheme.colorScheme.background
+                ) { innerPadding ->
+
+                    NavHost( // Defining the app's navigation routes
+                        navController = navController,
+                        startDestination = "catalog",
                         modifier = Modifier.padding(innerPadding)
-                    )
+                    ) {
+                        composable("catalog") {
+                            BookCatalogScreen(navController = navController)  // Providing navigation control for this screen
+                        }
+
+                        composable("reservations") {
+                            ReservationsScreen(navController = navController)
+                        }
+                    }
                 }
             }
         }
@@ -60,26 +87,37 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun BookCatalogScreen(modifier: Modifier = Modifier) {
+fun BookCatalogScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController // Displaying the catalog screen
+) {
     Column(modifier = modifier.fillMaxSize()) {
         // Calling composable functions
-        Header()
+        Header("Our Catalog")
         Search()
         BookCatalogGrid(modifier.weight(1f)) // Filling remaining middle space
-        Footer()
+        Footer("Your Reservations", "reservations", navController)
     }
 }
 
 // Creating header section and setting text
 @Composable
-fun Header() {
-    Text(
-        text = "Our Catalog",
+fun Header(heading: String) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
-        textAlign = TextAlign.Center
-    )
+            .height(80.dp)
+            .padding(0.dp, 10.dp)
+            .background(MaterialTheme.colorScheme.primary),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = heading,
+            style = MaterialTheme.typography.titleLarge
+        )
+    }
+
 }
 
 // Creating search bar and filter button
@@ -96,16 +134,25 @@ fun Search() {
         OutlinedTextField(
             value = "",
             onValueChange = {},
+            shape = RoundedCornerShape(50.dp),
             placeholder = {
-                Text("Search books")
+                Text(
+                    text = "Search",
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
             },
             // leadingIcon - Puts icon on the left
             trailingIcon = { // Putting icon on the right
                 Icon(
                     imageVector = Icons.Default.Search,// Needed to add Icons dependency
-                    contentDescription = "Search"
+                    contentDescription = "Search",
+                    tint = MaterialTheme.colorScheme.onSecondary
                 )
-            }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+            )
         )
 
         Button(
@@ -161,7 +208,9 @@ fun BookCatalogItem() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Badge(
-            modifier = Modifier.fillMaxWidth(0.5f)
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .height(25.dp)
         ) {
             Text("Availability")
         }
@@ -171,9 +220,13 @@ fun BookCatalogItem() {
                 .fillMaxWidth()
                 .clickable {
                     showReservationModal = true // Showing reservation modal when card is pressed
-                }
+                },
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
         ) {
-            Column( // Setting book details
+            Column(
+                // Setting book details
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -182,9 +235,25 @@ fun BookCatalogItem() {
                     contentDescription = "Book cover"
                 )
 
-                Text("Title")
-                Text("Author")
-                Text("Category")
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp, 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+
+                ) {
+                    Text(
+                        text = "Title"
+                    )
+                    Text(
+                        text = "Author"
+                    )
+                    Text(
+                        text = "Category"
+                    )
+                }
+
             }
         }
     }
@@ -199,20 +268,32 @@ fun BookCatalogItem() {
 
 // Creating footer section and setting text
 @Composable
-fun Footer() {
+fun Footer(
+    pageLink: String,
+    screen: String,
+    navController: NavController
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
-        horizontalArrangement = Arrangement.End
+            .padding(0.dp, 10.dp)
+            .height(40.dp)
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable {
+                navController.navigate(screen) // Navigating to the selected screen
+            },
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Your Reservations"
+            text = pageLink,
+            style = MaterialTheme.typography.labelSmall
         )
 
         Icon(
             painter = painterResource(R.drawable.ic_arrow_forward),
-            contentDescription = "Next Page"
+            contentDescription = "Next Page",
+            tint = MaterialTheme.colorScheme.secondary
         )
     }
 }
@@ -225,6 +306,7 @@ fun FilterDialog(
 ) {
     if (showFilterDialog) {
         AlertDialog(
+            containerColor = MaterialTheme.colorScheme.secondary,
             onDismissRequest = onDismiss,
             title = {
                 Text("Filter Catalog")
@@ -265,11 +347,13 @@ fun ReservationModal(
         ModalBottomSheet(
             modifier = Modifier.fillMaxHeight(),
             sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.secondary,
             onDismissRequest = onDismiss
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Text(
                     "Reserve A Book",
@@ -304,7 +388,24 @@ fun RadioButtonItem(option: String) {
             selected = selectedOption,
             onClick = { selectedOption = true }
         )
-        Text(option)
+        Text(
+            text = option,
+            color = MaterialTheme.colorScheme.onSecondary
+        )
+    }
+}
+
+@Composable
+fun ReservationsScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController // Displaying the reservations screen
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // Calling composable functions
+        Header("Your Reservations")
+        Search()
+        BookCatalogGrid(modifier.weight(1f)) // Filling remaining middle space
+        Footer("Our Catalog", "catalog", navController)
     }
 }
 
@@ -312,6 +413,6 @@ fun RadioButtonItem(option: String) {
 @Composable
 fun BookCatalogScreenPreview() {
     Kitabu_MADB372_SF1Theme {
-        BookCatalogScreen()
+        BookCatalogScreen(navController = rememberNavController())
     }
 }
