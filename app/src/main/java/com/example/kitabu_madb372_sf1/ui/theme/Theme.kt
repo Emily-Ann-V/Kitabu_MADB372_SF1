@@ -19,7 +19,7 @@ private val DarkColorScheme = darkColorScheme(
     surface = White,           // Default colour for surfaces such as cards and containers
 
     onPrimary = White,         // Colour displayed on the buttons
-    onSecondary = Navy,       // Colour displayed on CoolBrown components
+    onSecondary = Navy,       // Colour displayed on White components
     // onTertiary = CoolBrown,    // Colour displayed on White components
 
     onBackground = Navy,  // Colour displayed on the background
@@ -35,7 +35,7 @@ private val LightColorScheme = lightColorScheme(
     surface = White,           // Default colour for surfaces such as cards and containers
 
     onPrimary = White,         // Colour displayed on the buttons
-    onSecondary = Navy,       // Colour displayed on CoolBrown components
+    onSecondary = Navy,       // Colour displayed on White components
     // onTertiary = CoolBrown,    // Colour displayed on White components
 
     onBackground = Navy,  // Colour displayed on the background
