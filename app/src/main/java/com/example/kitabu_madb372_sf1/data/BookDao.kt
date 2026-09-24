@@ -9,9 +9,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BookDao {
-    // Creating a book
+
+    // Creating a list of books
     @Insert
-    suspend fun insertBook(book: BookEntity)
+    suspend fun insertBooks(books: List<BookEntity>)
 
     // Reading book list
 
@@ -36,5 +37,10 @@ interface BookDao {
     )
     fun getFilteredBooks(isAvailable: Boolean): Flow<List<BookEntity>>
 
-    // ToDo: Update Availability
+    // Updating book availability
+    @Query("UPDATE book SET isAvailable = :isAvailable WHERE bookId = :bookId")
+    suspend fun updateAvailability(
+        bookId: Int,
+        isAvailable: Boolean
+    )
 }

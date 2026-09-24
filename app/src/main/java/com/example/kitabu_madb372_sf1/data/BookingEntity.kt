@@ -7,6 +7,7 @@ import androidx.room3.PrimaryKey
 // Table that stores booking data
 @Entity(
     tableName = "booking",
+
     // Setting foreign key to link to reference BookEntity.bookId and CASCADE on delete
     foreignKeys = [ForeignKey(
         entity = BookEntity::class,
@@ -16,12 +17,11 @@ import androidx.room3.PrimaryKey
     )]
 )
 data class BookingEntity(
-    // Setting primary key to auto generate
-    @PrimaryKey(autoGenerate = true) val bookingId: Int = 0,
+    @PrimaryKey(autoGenerate = true) val bookingId: Int = 0, // Setting primary key to auto generate
     val bookOwnerId: Int,
     val userName: String,
     val bookingDate: Long,
     val returnDeadline: Long,
-    // Getting status options from the BookingStatus enum class
-    val status: BookingStatus
+    val duration: Int, // ToDo
+    val status: BookingStatus // Getting status options from the BookingStatus enum class
 )

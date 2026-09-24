@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -41,13 +42,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.kitabu_madb372_sf1.R
+import com.example.kitabu_madb372_sf1.data.BookEntity
+import com.example.kitabu_madb372_sf1.viewModel.BookViewModel
 
 @Composable
 fun BookCatalogScreen(
     modifier: Modifier = Modifier,
-    navController: NavController // Displaying the catalog screen
+    navController: NavController, // Displaying the catalog screen
+    bookViewModel: BookViewModel // ToDo
 ) {
     Column(
         modifier = modifier
@@ -64,7 +69,7 @@ fun BookCatalogScreen(
         ) {
             Search()
             Spacer(modifier = Modifier.height(20.dp))
-            BookCatalogGrid()
+            BookCatalogGrid(bookViewModel)
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -142,7 +147,12 @@ fun Search() {
 
 // Creating book grid
 @Composable
-fun BookCatalogGrid(modifier: Modifier = Modifier) {
+fun BookCatalogGrid(bookViewModel: BookViewModel, modifier: Modifier = Modifier) {
+
+
+    // ToDo
+    val books by bookViewModel.books.collectAsStateWithLifecycle()
+
     LazyVerticalGrid(
         // Scrolls vertically
         modifier = modifier,
@@ -151,12 +161,10 @@ fun BookCatalogGrid(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(20.dp) // Adding vertical spacing to in-between items
         // columns = GridCells.Fixed(2) - Always have 2 columns
     ) {
-        item {
-            BookCatalogItem() // Showing book
-        }
 
-        item {
-            BookCatalogItem()
+        // ToDo
+        items(books) { book ->
+            BookCatalogItem(book)
         }
     }
 }
@@ -164,7 +172,7 @@ fun BookCatalogGrid(modifier: Modifier = Modifier) {
 // Creating book
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookCatalogItem() {
+fun BookCatalogItem(book: BookEntity) {
     var showReservationModal by remember { mutableStateOf(false) } // Setting up state
 
     val modalState = rememberModalBottomSheetState(
@@ -179,14 +187,21 @@ fun BookCatalogItem() {
                 .fillMaxWidth(0.5f)
                 .height(25.dp)
         ) {
-            Text("Availability")
+            Text(
+                text = if (book.isAvailable) {
+                    "Available"
+                } else {
+                    "Borrowed"
+                }
+            )
         }
 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    showReservationModal = true // Showing reservation modal when card is pressed
+                    showReservationModal =
+                        true // Showing reservation modal when card is pressed
                 },
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primary
@@ -198,7 +213,7 @@ fun BookCatalogItem() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    painter = painterResource(R.drawable.img_default),
+                    painter = painterResource(book.imageResId),
                     contentDescription = "Book cover"
                 )
 
@@ -211,13 +226,13 @@ fun BookCatalogItem() {
 
                 ) {
                     Text(
-                        text = "Title"
+                        text = book.title
                     )
                     Text(
-                        text = "Author"
+                        text = book.author
                     )
                     Text(
-                        text = "Category"
+                        text = book.category
                     )
                 }
 
@@ -361,3 +376,4 @@ fun RadioButtonItem(option: String) {
         )
     }
 }
+

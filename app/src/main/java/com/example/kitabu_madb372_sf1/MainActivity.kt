@@ -11,12 +11,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.kitabu_madb372_sf1.ui.screens.BookCatalogScreen
 import com.example.kitabu_madb372_sf1.ui.screens.ReservationsScreen
 import com.example.kitabu_madb372_sf1.ui.theme.Kitabu_MADB372_SF1Theme
+import com.example.kitabu_madb372_sf1.viewModel.BookViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +28,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             Kitabu_MADB372_SF1Theme {
 
-                val navController = rememberNavController()
+                val navController = rememberNavController() // ToDo
+                val bookViewModel: BookViewModel = viewModel() // ToDO
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -39,7 +42,10 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable("catalog") {
-                            BookCatalogScreen(navController = navController)  // Providing navigation control for this screen
+                            BookCatalogScreen(
+                                navController = navController,
+                                bookViewModel = bookViewModel
+                            )  // Providing navigation control for this screen
                         }
 
                         composable("reservations") {
@@ -57,7 +63,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun BookCatalogScreenPreview() {
     Kitabu_MADB372_SF1Theme {
-        BookCatalogScreen(navController = rememberNavController())
+        BookCatalogScreen(navController = rememberNavController(), bookViewModel = viewModel())
     }
 }
 

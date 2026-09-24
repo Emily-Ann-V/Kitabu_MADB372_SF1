@@ -7,11 +7,10 @@ import androidx.room3.PrimaryKey
 // Table that stores book data
 @Entity(tableName = "book")
 data class BookEntity(
-    // Setting primary key to auto generate
-    @PrimaryKey(autoGenerate = true) val bookId: Int = 0,
+    @PrimaryKey(autoGenerate = true) val bookId: Int = 0, // Setting primary key to auto generate
+    val imageResId: Int, // ToDo
     val title: String,
     val author: String,
     val category: String,
-    // Setting default value to true
-    @ColumnInfo(defaultValue = "1") val isAvailable: Boolean = true
+    @ColumnInfo(defaultValue = "1") val isAvailable: Boolean = true // Setting default value to true
 )
