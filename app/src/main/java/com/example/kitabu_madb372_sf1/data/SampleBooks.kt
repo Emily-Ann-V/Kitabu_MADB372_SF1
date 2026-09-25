@@ -2,6 +2,7 @@ package com.example.kitabu_madb372_sf1.data
 
 import com.example.kitabu_madb372_sf1.R
 
+// List of pre-set book data
 val sampleBooks = listOf(
     BookEntity(
         imageResId = R.drawable.img_textbook_introduction_to_law_and_legal_skills_in_south_africa_2ed,

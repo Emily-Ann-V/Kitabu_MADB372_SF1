@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,12 +48,14 @@ import androidx.navigation.NavController
 import com.example.kitabu_madb372_sf1.R
 import com.example.kitabu_madb372_sf1.data.BookEntity
 import com.example.kitabu_madb372_sf1.viewModel.BookViewModel
+import com.example.kitabu_madb372_sf1.viewModel.BookingViewModel
 
 @Composable
 fun BookCatalogScreen(
     modifier: Modifier = Modifier,
     navController: NavController, // Displaying the catalog screen
-    bookViewModel: BookViewModel // ToDo
+    bookViewModel: BookViewModel, // Providing the ViewModel for managing book data
+    bookingViewModel: BookingViewModel // Providing the ViewModel for managing booking data
 ) {
     Column(
         modifier = modifier
@@ -67,9 +70,9 @@ fun BookCatalogScreen(
                 .weight(1f)
                 .padding(horizontal = 10.dp)
         ) {
-            Search()
+            Search(bookViewModel)
             Spacer(modifier = Modifier.height(20.dp))
-            BookCatalogGrid(bookViewModel)
+            BookCatalogGrid(bookViewModel, bookingViewModel) // Providing the ViewModel
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -98,16 +101,24 @@ fun Header(heading: String) {
 
 // Creating search bar and filter button
 @Composable
-fun Search() {
+fun Search(bookViewModel: BookViewModel) {
+
+    // Setting up filter dialog state
     var showFilterDialog by remember { mutableStateOf(false) }
+
+    // Storing the search query
+    var query by remember { mutableStateOf("") }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         OutlinedTextField(
-            value = "",
-            onValueChange = {},
+            value = query,
+            onValueChange = {
+                query = it
+                bookViewModel.getSearchedBooks(it) // Searching books using the query input
+            },
             shape = RoundedCornerShape(50.dp),
             placeholder = {
                 Text(
@@ -138,6 +149,7 @@ fun Search() {
         }
     }
     FilterDialog(
+        bookViewModel,
         showFilterDialog = showFilterDialog,
         onDismiss = {
             showFilterDialog = false // Hiding filter dialog
@@ -147,10 +159,14 @@ fun Search() {
 
 // Creating book grid
 @Composable
-fun BookCatalogGrid(bookViewModel: BookViewModel, modifier: Modifier = Modifier) {
+fun BookCatalogGrid(
+    bookViewModel: BookViewModel,
+    bookingViewModel: BookingViewModel,
+    modifier: Modifier = Modifier
+) {
 
 
-    // ToDo
+    // Getting the current list of books from the ViewModel
     val books by bookViewModel.books.collectAsStateWithLifecycle()
 
     LazyVerticalGrid(
@@ -162,9 +178,9 @@ fun BookCatalogGrid(bookViewModel: BookViewModel, modifier: Modifier = Modifier)
         // columns = GridCells.Fixed(2) - Always have 2 columns
     ) {
 
-        // ToDo
+        // Displaying each book in the list
         items(books) { book ->
-            BookCatalogItem(book)
+            BookCatalogItem(book, bookingViewModel)
         }
     }
 }
@@ -172,9 +188,12 @@ fun BookCatalogGrid(bookViewModel: BookViewModel, modifier: Modifier = Modifier)
 // Creating book
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookCatalogItem(book: BookEntity) {
-    var showReservationModal by remember { mutableStateOf(false) } // Setting up state
+fun BookCatalogItem(book: BookEntity, bookingViewModel: BookingViewModel) {
 
+    // Setting up reservation modal state
+    var showReservationModal by remember { mutableStateOf(false) }
+
+    // Setting up reservation modal sheet state
     val modalState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false // Allowing modal to open partially
     )
@@ -187,7 +206,7 @@ fun BookCatalogItem(book: BookEntity) {
                 .fillMaxWidth(0.5f)
                 .height(25.dp)
         ) {
-            Text(
+            Text( // Setting text based on book availability
                 text = if (book.isAvailable) {
                     "Available"
                 } else {
@@ -200,8 +219,9 @@ fun BookCatalogItem(book: BookEntity) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    showReservationModal =
-                        true // Showing reservation modal when card is pressed
+                    if (book.isAvailable) {
+                        showReservationModal = true
+                    } // Showing reservation modal when card is pressed if book is available
                 },
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primary
@@ -240,6 +260,8 @@ fun BookCatalogItem(book: BookEntity) {
         }
     }
     ReservationModal(
+        book,
+        bookingViewModel,
         showReservationSheet = showReservationModal,
         sheetState = modalState,
         onDismiss = {
@@ -283,19 +305,46 @@ fun Footer(
 // Creating filter dialog
 @Composable
 fun FilterDialog(
+    bookViewModel: BookViewModel,
     showFilterDialog: Boolean,
     onDismiss: () -> Unit
 ) {
+
+    // Storing the selected radio button option
+    var selectedOption by remember { mutableStateOf("Any") }
+
     if (showFilterDialog) {
         AlertDialog(
             containerColor = MaterialTheme.colorScheme.secondary,
             onDismissRequest = onDismiss,
             title = {
-                Text("Filter Catalog")
+                Text("Filter Catalog By Availability")
             },
             text = {
                 Column {
-                    RadioButtonItem(option = "Author")
+                    RadioButtonItem(
+                        "Any", // Setting filter option
+                        selectedOption == "Any" // Checking if option is selected
+                    ) {
+                        selectedOption = "Any" // Setting selected filter
+                        bookViewModel.getAllBooks() // Getting all books
+                    }
+
+                    RadioButtonItem(
+                        "Available",
+                        selectedOption == "Available"
+                    ) {
+                        selectedOption = "Available"
+                        bookViewModel.getFilteredBooks(true) // Getting available books
+                    }
+
+                    RadioButtonItem(
+                        "Borrowed",
+                        selectedOption == "Borrowed"
+                    ) {
+                        selectedOption = "Borrowed"
+                        bookViewModel.getFilteredBooks(false) // Getting borrowed books
+                    }
                 }
             },
             confirmButton = {
@@ -321,10 +370,15 @@ fun FilterDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationModal(
+    book: BookEntity,
+    bookingViewModel: BookingViewModel,
     showReservationSheet: Boolean,
     sheetState: SheetState,
     onDismiss: () -> Unit
 ) {
+    // Storing the selected radio button duration
+    var selectedDuration by remember { mutableIntStateOf(3) }
+
     if (showReservationSheet) {
         ModalBottomSheet(
             modifier = Modifier.fillMaxHeight(),
@@ -344,10 +398,30 @@ fun ReservationModal(
                     "Rental Duration",
                 )
                 Column {
-                    RadioButtonItem("1 Day")
+                    RadioButtonItem(
+                        "3 Day", // Setting rental duration
+                        selectedDuration == 3 // Checking if duration is selected
+                    ) {
+                        selectedDuration = 3 // Setting selected rental duration to 3 days
+                    }
+
+                    RadioButtonItem(
+                        "7 Day",
+                        selectedDuration == 7
+                    ) {
+                        selectedDuration = 7 // Setting selected rental duration to 7 days
+                    }
+
+                    RadioButtonItem(
+                        "14 Day",
+                        selectedDuration == 14
+                    ) {
+                        selectedDuration = 14 // Setting selected rental duration to 14 days
+                    }
                 }
 
-                Button(onClick = {}) {
+                // Creating a booking when user presses reserve
+                Button(onClick = { bookingViewModel.makeBooking(book, selectedDuration) }) {
                     Text(
                         text = "Reserve"
                     )
@@ -360,15 +434,14 @@ fun ReservationModal(
 
 // Creating radio buttons
 @Composable
-fun RadioButtonItem(option: String) {
-    var selectedOption by remember { mutableStateOf(false) } // Storing the selected radio button option
+fun RadioButtonItem(option: String, selected: Boolean, onClick: () -> Unit) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
-            selected = selectedOption,
-            onClick = { selectedOption = true }
+            selected = selected,
+            onClick = onClick
         )
         Text(
             text = option,

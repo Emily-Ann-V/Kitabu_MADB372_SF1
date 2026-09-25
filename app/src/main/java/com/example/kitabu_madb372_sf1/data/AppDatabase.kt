@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 // Defining database with tables
 @Database(entities = [BookEntity::class, BookingEntity::class], version = 1)
 
-// Connecting database to convertor
+// Connecting database to converter
 @ColumnTypeConverters(StatusConverter::class)
 
 // Connecting app to database
@@ -41,17 +41,23 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                     .setDriver(AndroidSQLiteDriver())
 
+                    // Configuring to pre-populate sample book records
+                    .addCallback(object : Callback() {
+                        override suspend fun onCreate(connection: androidx.sqlite.SQLiteConnection) {
+                            super.onCreate(connection)
+
+                            CoroutineScope(Dispatchers.IO).launch {
+                                INSTANCE?.bookDao()?.insertBooks(sampleBooks)
+                            }
+                        }
+                    })
+
                     // Building the database
                     .build()
 
                     // Saving the database instance for future use
                     .also { database ->
                         INSTANCE = database
-
-                        // Configuring to pre-populate sample book records
-                        CoroutineScope(Dispatchers.IO).launch {
-                            database.bookDao().insertBooks(sampleBooks)
-                        }
                     }
             }
         }

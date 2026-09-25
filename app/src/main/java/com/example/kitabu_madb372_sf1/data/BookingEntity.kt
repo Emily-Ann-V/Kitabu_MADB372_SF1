@@ -22,6 +22,6 @@ data class BookingEntity(
     val userName: String,
     val bookingDate: Long,
     val returnDeadline: Long,
-    val duration: Int, // ToDo
+    val duration: Int, // Getting rental duration
     val status: BookingStatus // Getting status options from the BookingStatus enum class
 )
