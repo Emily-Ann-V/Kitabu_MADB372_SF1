@@ -117,7 +117,7 @@ fun Search(bookViewModel: BookViewModel) {
             value = query,
             onValueChange = {
                 query = it
-                bookViewModel.getSearchedBooks(it) // Searching books using the query input
+                bookViewModel.getSearchedBooks(it.trim()) // Searching books using the query input
             },
             shape = RoundedCornerShape(50.dp),
             placeholder = {

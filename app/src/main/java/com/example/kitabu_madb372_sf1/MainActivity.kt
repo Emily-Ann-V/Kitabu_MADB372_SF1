@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -62,26 +60,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun BookCatalogScreenPreview() {
-    Kitabu_MADB372_SF1Theme {
-        BookCatalogScreen(
-            navController = rememberNavController(),
-            bookViewModel = viewModel(),
-            bookingViewModel = viewModel()
-        )
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ReservationsScreenPreview() {
-    Kitabu_MADB372_SF1Theme {
-        ReservationsScreen(navController = rememberNavController(), bookingViewModel = viewModel())
     }
 }

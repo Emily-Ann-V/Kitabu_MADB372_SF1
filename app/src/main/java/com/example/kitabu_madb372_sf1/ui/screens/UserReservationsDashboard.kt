@@ -60,7 +60,7 @@ fun ReservationsScreen(
     }
 }
 
-// Creating book grid
+// Creating booking grid
 @Composable
 fun ActiveBookingsList(bookingViewModel: BookingViewModel, modifier: Modifier = Modifier) {
 
