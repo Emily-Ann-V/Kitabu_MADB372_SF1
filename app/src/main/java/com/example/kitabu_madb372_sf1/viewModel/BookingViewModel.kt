@@ -32,37 +32,84 @@ class BookingViewModel(application: Application) : AndroidViewModel(application)
             )
 
     // Adding booking from the repository
-    fun makeBooking(book: BookEntity, duration: Int) {
+    fun makeBooking(book: BookEntity, duration: Int, onSuccess: () -> Unit, onFailure: () -> Unit) {
         viewModelScope.launch {
-            repository.makeBooking(book, duration)
+            try {
+                repository.makeBooking(book, duration)
+                onSuccess()
+            } catch (_: Exception) {
+                onFailure()
+            }
         }
     }
 
     // Updating booking information when being actively rented from the repository
-    fun updateActiveStatus(bookingId: Int, duration: Int, bookId: Int) {
+    fun updateActiveStatus(
+        bookingId: Int,
+        duration: Int,
+        bookId: Int,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
         viewModelScope.launch {
-            repository.updateActiveStatus(bookingId, BookingStatus.ACTIVE, duration, bookId)
+            try {
+                repository.updateActiveStatus(bookingId, BookingStatus.ACTIVE, duration, bookId)
+                onSuccess()
+            } catch (_: Exception) {
+                onFailure()
+            }
         }
     }
 
     // Updating booking information when booking is renewed from the repository
-    fun renewBooking(bookingId: Int, duration: Int, returnDeadline: Long) {
+    fun renewBooking(
+        bookingId: Int,
+        duration: Int,
+        returnDeadline: Long,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
         viewModelScope.launch {
-            repository.renewBooking(bookingId, duration, returnDeadline)
+            try {
+                repository.renewBooking(bookingId, duration, returnDeadline)
+                onSuccess()
+            } catch (_: Exception) {
+                onFailure()
+            }
         }
     }
 
     // Updating booking information when book is returned from the repository
-    fun updateReturnStatus(bookingId: Int, bookId: Int) {
+    fun updateReturnStatus(
+        bookingId: Int,
+        bookId: Int,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
         viewModelScope.launch {
-            repository.updateReturnStatus(bookingId, BookingStatus.RETURNED, bookId)
+            try {
+                repository.updateReturnStatus(bookingId, BookingStatus.RETURNED, bookId)
+                onSuccess()
+            } catch (_: Exception) {
+                onFailure()
+            }
         }
     }
 
     // Deleting booking and updating book information when booking is cancelled from the repository
-    fun cancelBooking(booking: BookingEntity, bookId: Int) {
+    fun cancelBooking(
+        booking: BookingEntity,
+        bookId: Int,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
         viewModelScope.launch {
-            repository.cancelBooking(booking, bookId)
+            try {
+                repository.cancelBooking(booking, bookId)
+                onSuccess()
+            } catch (_: Exception) {
+                onFailure()
+            }
         }
     }
 }

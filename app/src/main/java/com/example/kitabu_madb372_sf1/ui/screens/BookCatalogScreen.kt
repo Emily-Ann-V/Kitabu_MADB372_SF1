@@ -1,5 +1,6 @@
 package com.example.kitabu_madb372_sf1.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,12 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
@@ -25,6 +28,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -41,12 +45,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.kitabu_madb372_sf1.R
 import com.example.kitabu_madb372_sf1.data.BookEntity
+import com.example.kitabu_madb372_sf1.ui.theme.Green
+import com.example.kitabu_madb372_sf1.ui.theme.Red
 import com.example.kitabu_madb372_sf1.viewModel.BookViewModel
 import com.example.kitabu_madb372_sf1.viewModel.BookingViewModel
 
@@ -114,6 +124,7 @@ fun Search(bookViewModel: BookViewModel) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(0.7f),
             value = query,
             onValueChange = {
                 query = it
@@ -126,13 +137,23 @@ fun Search(bookViewModel: BookViewModel) {
                     color = MaterialTheme.colorScheme.onSecondary
                 )
             },
+
             // leadingIcon - Puts icon on the left
             trailingIcon = { // Putting icon on the right
-                Icon(
-                    imageVector = Icons.Default.Search,// Needed to add Icons dependency
-                    contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.onSecondary
-                )
+
+                // Clearing search
+                IconButton(
+                    onClick = {
+                        query = ""
+                        bookViewModel.getAllBooks()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Clear search",
+                        tint = MaterialTheme.colorScheme.onSecondary
+                    )
+                }
             },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -140,7 +161,12 @@ fun Search(bookViewModel: BookViewModel) {
             )
         )
 
+        Spacer(
+            modifier = Modifier.fillMaxWidth(0.1f)
+        )
+
         Button(
+            modifier = Modifier.fillMaxWidth(),
             onClick = {
                 showFilterDialog = true // Showing filter dialog when button is pressed
             }
@@ -172,7 +198,7 @@ fun BookCatalogGrid(
     LazyVerticalGrid(
         // Scrolls vertically
         modifier = modifier,
-        columns = GridCells.Adaptive(minSize = 130.dp), // Adaptive cell width based on screen size
+        columns = GridCells.Adaptive(minSize = 150.dp), // Adaptive cell width based on screen size
         horizontalArrangement = Arrangement.spacedBy(20.dp), // Adding horizontal spacing to in-between items
         verticalArrangement = Arrangement.spacedBy(20.dp) // Adding vertical spacing to in-between items
         // columns = GridCells.Fixed(2) - Always have 2 columns
@@ -204,9 +230,14 @@ fun BookCatalogItem(book: BookEntity, bookingViewModel: BookingViewModel) {
         Badge(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
-                .height(25.dp)
+                .height(28.dp),
+            containerColor = if (book.isAvailable) {
+                Green
+            } else {
+                Red
+            }
         ) {
-            Text( // Setting text based on book availability
+            Text(
                 text = if (book.isAvailable) {
                     "Available"
                 } else {
@@ -218,6 +249,7 @@ fun BookCatalogItem(book: BookEntity, bookingViewModel: BookingViewModel) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(400.dp)
                 .clickable {
                     if (book.isAvailable) {
                         showReservationModal = true
@@ -234,25 +266,41 @@ fun BookCatalogItem(book: BookEntity, bookingViewModel: BookingViewModel) {
             ) {
                 Image(
                     painter = painterResource(book.imageResId),
-                    contentDescription = "Book cover"
+                    contentDescription = "Book cover",
+                    modifier = Modifier
+                        .fillMaxHeight(0.5f)
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.Crop
                 )
 
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp),
+                        .fillMaxSize()
+                        .padding(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(
+                        10.dp,
+                        Alignment.CenterVertically
+                    )
 
                 ) {
                     Text(
-                        text = book.title
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = book.title,
+                        style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = book.author
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = book.author,
+                        style = MaterialTheme.typography.titleSmall
                     )
                     Text(
-                        text = book.category
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = book.category,
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
 
@@ -318,7 +366,7 @@ fun FilterDialog(
             containerColor = MaterialTheme.colorScheme.secondary,
             onDismissRequest = onDismiss,
             title = {
-                Text("Filter Catalog By Availability")
+                Text("Filter By Availability")
             },
             text = {
                 Column {
@@ -379,6 +427,9 @@ fun ReservationModal(
     // Storing the selected radio button duration
     var selectedDuration by remember { mutableIntStateOf(3) }
 
+    // Getting the current context for Toast messages
+    val context = LocalContext.current
+
     if (showReservationSheet) {
         ModalBottomSheet(
             modifier = Modifier.fillMaxHeight(),
@@ -392,28 +443,28 @@ fun ReservationModal(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Text(
-                    "Reserve A Book",
+                    "Reserve a book",
                 )
                 Text(
-                    "Rental Duration",
+                    "Pick a rental duration",
                 )
                 Column {
                     RadioButtonItem(
-                        "3 Day", // Setting rental duration
+                        "3 Days", // Setting rental duration
                         selectedDuration == 3 // Checking if duration is selected
                     ) {
                         selectedDuration = 3 // Setting selected rental duration to 3 days
                     }
 
                     RadioButtonItem(
-                        "7 Day",
+                        "7 Days",
                         selectedDuration == 7
                     ) {
                         selectedDuration = 7 // Setting selected rental duration to 7 days
                     }
 
                     RadioButtonItem(
-                        "14 Day",
+                        "14 Days",
                         selectedDuration == 14
                     ) {
                         selectedDuration = 14 // Setting selected rental duration to 14 days
@@ -421,14 +472,38 @@ fun ReservationModal(
                 }
 
                 // Creating a booking when user presses reserve
-                Button(onClick = { bookingViewModel.makeBooking(book, selectedDuration) }) {
-                    Text(
-                        text = "Reserve"
-                    )
+                Button(
+                    onClick = {
+                        bookingViewModel.makeBooking(
+                            book = book,
+                            duration = selectedDuration,
+
+                            // Showing Toast when booking is made
+                            onSuccess = {
+                                Toast.makeText(
+                                    context,
+                                    "Booking made",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                onDismiss()
+                            },
+
+                            // Showing Toast when booking failed
+                            onFailure = {
+                                Toast.makeText(
+                                    context,
+                                    "Failed make booking",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                    }
+                ) {
+                    Text("Reserve")
                 }
             }
         }
-
     }
 }
 

@@ -13,14 +13,12 @@ import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
     primary = Navy,       // Main colour of the app (buttons)
     secondary = White,     // Secondary colour
-    // tertiary = White,          // Additional colour
 
     background = White,        // Main background colour of the screens
     surface = White,           // Default colour for surfaces such as cards and containers
 
     onPrimary = White,         // Colour displayed on the buttons
     onSecondary = Navy,       // Colour displayed on White components
-    // onTertiary = CoolBrown,    // Colour displayed on White components
 
     onBackground = Navy,  // Colour displayed on the background
     onSurface = Navy      // Colour displayed on White surfaces
@@ -29,14 +27,12 @@ private val DarkColorScheme = darkColorScheme(
 private val LightColorScheme = lightColorScheme(
     primary = Navy,       // Main colour of the app (buttons)
     secondary = White,     // Secondary colour
-    // tertiary = White,          // Additional colour
 
     background = White,        // Main background colour of the screens
     surface = White,           // Default colour for surfaces such as cards and containers
 
     onPrimary = White,         // Colour displayed on the buttons
     onSecondary = Navy,       // Colour displayed on White components
-    // onTertiary = CoolBrown,    // Colour displayed on White components
 
     onBackground = Navy,  // Colour displayed on the background
     onSurface = Navy      // Colour displayed on White surfaces

@@ -1,5 +1,6 @@
 package com.example.kitabu_madb372_sf1.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Badge
@@ -22,12 +24,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.kitabu_madb372_sf1.data.BookingStatus
 import com.example.kitabu_madb372_sf1.data.JoinedBookingData
+import com.example.kitabu_madb372_sf1.ui.theme.Green
+import com.example.kitabu_madb372_sf1.ui.theme.Orange
+import com.example.kitabu_madb372_sf1.ui.theme.Red
 import com.example.kitabu_madb372_sf1.viewModel.BookingViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -97,13 +105,29 @@ fun ActiveBookingsItem(joinedBooking: JoinedBookingData, bookingViewModel: Booki
         booking.returnDeadline - System.currentTimeMillis()
     )
 
+    // Getting the current context for Toast messages
+    val context = LocalContext.current
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Badge(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
-                .height(30.dp)
+                .height(30.dp),
+            containerColor = when (booking.status) {
+                BookingStatus.ACTIVE -> {
+                    Green
+                }
+
+                BookingStatus.PENDING -> {
+                    Orange
+                }
+
+                else -> {
+                    Red
+                }
+            }
         ) {
             Text(text = booking.status.name)
         }
@@ -122,25 +146,41 @@ fun ActiveBookingsItem(joinedBooking: JoinedBookingData, bookingViewModel: Booki
             ) {
                 Image(
                     painter = painterResource(book.imageResId),
-                    contentDescription = "Book cover"
+                    contentDescription = "Book cover",
+                    modifier = Modifier
+                        .height(400.dp)
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.Crop
                 )
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp),
+                        .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(
+                        20.dp,
+                        Alignment.CenterVertically
+                    )
 
                 ) {
                     Text(
-                        text = book.title
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = book.title,
+                        style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = book.author
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = book.author,
+                        style = MaterialTheme.typography.titleSmall
                     )
                     Text(
-                        text = book.category
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = book.category,
+                        style = MaterialTheme.typography.bodyLarge
                     )
 
                     if (booking.status == BookingStatus.PENDING) {
@@ -155,88 +195,164 @@ fun ActiveBookingsItem(joinedBooking: JoinedBookingData, bookingViewModel: Booki
                             text = "Days remaining: $daysRemaining"
                         )
                     }
-                }
 
-                // Showing relevant buttons depending on booking state
-                if (booking.status == BookingStatus.PENDING) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        // Updating booking information after book is picked-up
-                        Button(
-                            onClick = {
-                                bookingViewModel.updateActiveStatus(
-                                    booking.bookingId,
-                                    booking.duration,
-                                    book.bookId
+                    // Showing relevant buttons depending on booking state
+                    if (booking.status == BookingStatus.PENDING) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            // Updating booking information after book is picked-up
+                            Button(
+                                onClick = {
+                                    bookingViewModel.updateActiveStatus(
+                                        booking.bookingId,
+                                        booking.duration,
+                                        book.bookId,
+
+                                        // Showing Toast when book is picked-up
+                                        onSuccess = {
+                                            Toast.makeText(
+                                                context,
+                                                "Book picked-up",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+
+                                        // Showing Toast when failed to pick-up book
+                                        onFailure = {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to pick-up book",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
                                 )
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            )
-                        ) {
-                            Text(
-                                text = "Pick-Up"
-                            )
-                        }
-
-                        // Cancelling booking
-                        Button(
-                            onClick = { bookingViewModel.cancelBooking(booking, book.bookId) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            )
-                        ) {
-                            Text(
-                                text = "Cancel"
-                            )
-                        }
-                    }
-                } else {
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-
-                        // Renewing booking
-                        Button(
-                            onClick = {
-                                bookingViewModel.renewBooking(
-                                    booking.bookingId,
-                                    booking.duration,
-                                    booking.returnDeadline
+                            ) {
+                                Text(
+                                    text = "Pick-Up"
                                 )
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            )
-                        ) {
-                            Text(
-                                text = "Renew"
-                            )
-                        }
+                            }
 
-                        // Returning book
-                        Button(
-                            onClick = {
-                                bookingViewModel.updateReturnStatus(
-                                    booking.bookingId,
-                                    book.bookId
+                            // Cancelling booking
+                            Button(
+                                onClick = {
+                                    bookingViewModel.cancelBooking(
+                                        booking, book.bookId,
+
+                                        // Showing Toast when booking is cancelled
+                                        onSuccess = {
+                                            Toast.makeText(
+                                                context,
+                                                "Booking cancelled",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+
+                                        // Showing Toast when failed to cancel booking
+                                        onFailure = {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to cancel booking",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
                                 )
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            )
+                            ) {
+                                Text(
+                                    text = "Cancel"
+                                )
+                            }
+                        }
+                    } else {
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            Text(
-                                text = "Return"
-                            )
+
+                            // Renewing booking
+                            Button(
+                                onClick = {
+                                    bookingViewModel.renewBooking(
+                                        booking.bookingId,
+                                        booking.duration,
+                                        booking.returnDeadline,
+
+                                        // Showing Toast when booking is renewed
+                                        onSuccess = {
+                                            Toast.makeText(
+                                                context,
+                                                "Booking renewed",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+
+                                        // Showing Toast when failed to renew booking
+                                        onFailure = {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to renew booking",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
+                                )
+                            ) {
+                                Text(
+                                    text = "Renew"
+                                )
+                            }
+
+                            // Returning book
+                            Button(
+                                onClick = {
+                                    bookingViewModel.updateReturnStatus(
+                                        booking.bookingId,
+                                        book.bookId,
+
+                                        // Showing Toast when book is returned
+                                        onSuccess = {
+                                            Toast.makeText(
+                                                context,
+                                                "Book returned",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+
+                                        // Showing Toast when failed to return book
+                                        onFailure = {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to return book",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
+                                )
+                            ) {
+                                Text(
+                                    text = "Return"
+                                )
+                            }
                         }
                     }
                 }

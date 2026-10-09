@@ -8,7 +8,7 @@ import androidx.room3.PrimaryKey
 @Entity(tableName = "book")
 data class BookEntity(
     @PrimaryKey(autoGenerate = true) val bookId: Int = 0, // Setting primary key to auto generate
-    val imageResId: Int, // ToDo
+    val imageResId: Int,
     val title: String,
     val author: String,
     val category: String,
