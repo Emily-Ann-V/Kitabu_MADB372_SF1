@@ -21,6 +21,9 @@ Uses MVVM architecture:
 
 ### Create
 
+ <img width="591" height="449" alt="image" src="https://github.com/user-attachments/assets/269d105c-b969-4e02-8bf4-1079ec856efb" />
+Figure 1: Using insertBooks to populate the database
+
 
 ### Read
 
